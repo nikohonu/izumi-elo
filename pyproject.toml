@@ -1,0 +1,25 @@
+[project]
+name = "izumi-elo"
+version = "0.1.0"
+description = "アニメフォルダを管理するためのプログラムです。再生、並び替え、今すぐ再生するのに最適なものを選択し、アクションをAnilist.coに反映する機能が含まれています。"
+authors = [{ name = "nikohonu", email = "nikohonu@proton.me" }]
+dependencies = []
+requires-python = ">=3.12"
+readme = "README.md"
+license = { text = "MIT" }
+
+[build-system]
+requires = ["pdm-backend"]
+build-backend = "pdm.backend"
+
+[tool.pdm]
+distribution = true
+
+[tool.pdm.dev-dependencies]
+dev = ["basedpyright>=1.17.2", "ruff>=0.6.4"]
+
+[project.scripts]
+izumi = 'izumi_elo.__main__:main'
+
+[tool.basedpyright]
+typeCheckingMode = "standard"
