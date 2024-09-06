@@ -24,8 +24,8 @@ def init(
 def play():
     config = Config.load()
     library = Library(config)
-    library.play()
-    library.elo(4)
+    # library.play()
+    # library.elo(4)
 
 
 @main.command()
