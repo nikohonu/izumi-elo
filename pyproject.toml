@@ -10,8 +10,8 @@ dependencies = [
     "msgspec>=0.18.6",
     "tomli-w>=1.0.0",
     "requests>=2.32.3",
-    "inquirer>=3.4.0",
     "pathvalidate>=3.2.1",
+    "simple-term-menu>=1.6.4",
 ]
 requires-python = ">=3.12"
 readme = "README.md"

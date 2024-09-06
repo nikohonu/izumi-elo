@@ -23,6 +23,10 @@ def dec_hook(type: Type, obj: str) -> Path:
 
 class Config(msgspec.Struct):
     library_path: Path
+    access_token: str
+
+    def get_audio_path(self):
+        return self.library_path / "audio"
 
     @classmethod
     def load(cls):

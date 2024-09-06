@@ -1,123 +1,122 @@
-from pathlib import Path
-from typing import Any
-from izumi_elo.anime_directory import AnimeDirectory
-from izumi_elo.anilist import search_anime
-from izumi_elo.anime import Anime
-from izumi_elo.config import Config
-import inquirer
+import datetime as dt
 import random
+import shutil
+from pathlib import Path
+
 import typer
 from pathvalidate import sanitize_filename
+from simple_term_menu import TerminalMenu
 
-
-def calc_current_episode(anime_path, episodes):
-    return episodes - len(list(anime_path.glob("*.mkv")))
-
-
-def find_anime(anime_path: Path) -> Anime:
-    questions_dict: dict[str, Anime] = {anime.get_key(): anime for anime in result}
-    questions = [
-        inquirer.List(
-            "key",
-            message="正しいアニメを選んでください",
-            choices=questions_dict.keys(),
-        ),
-    ]
-    answer: dict[str, Anime] | None = inquirer.prompt(questions)
-    if answer:
-        anime = questions_dict[answer["key"]]
-        current_episode = typer.prompt(
-            "現在のエピソードは？",
-            default=calc_current_episode(anime_path, anime.episodes),
-            type=int,
-        )
-        anime.current_episode = current_episode
-        return anime
-    else:
-        raise RuntimeError("アニメオブジェクトを作成できません。")
+from izumi_elo.anilist import Anilist
+from izumi_elo.anime import Anime
+from izumi_elo.anime_directory import AnimeDirectory
+from izumi_elo.config import Config
 
 
 class Library:
     def __init__(self, config: Config) -> None:
         self.collection = []
-        for anime_path in config.library_path.iterdir():
-            if anime_path.is_file():
+        self.config = config
+        for anime_path in self.config.library_path.iterdir():
+            if anime_path.is_file() or anime_path.name == "audio":
                 continue
             anime_directory = AnimeDirectory(anime_path)
+            self.collection.append(anime_directory)
+        self.collection.sort(key=lambda x: x.anime.elo, reverse=True)
 
-    #         # check if anime is indexed
-    #         index_path = anime_path / "index.toml"
-    #         if index_path.is_file():
-    #             anime = Anime.load(index_path)
-    #         else:
-    #             anime = find_anime(anime_path)
-    #             new_anime_path = anime_path.with_name(
-    #                 sanitize_filename(anime.get_key())
-    #             )
-    #             if typer.confirm(
-    #                 f"アニメフォルダの名前を変更しますか「{new_anime_path.name}」？"
-    #             ):
-    #                 anime_path.rename(new_anime_path)
-    #                 anime_path = new_anime_path
-    #             anime.path = anime_path
-    #             anime.save()
-    #         self.anime.append(anime)
-    #     self.anime = sorted(self.anime, key=lambda x: x.elo, reverse=True)
+    def move_file(self, old_path: Path, new_path: Path):
+        for suffix in [".ass", ".srt"]:
+            sub_file: Path = old_path.with_suffix(suffix)
+            if sub_file.is_file():
+                sub_file.rename(new_path.parent / sub_file.name)
+        old_path.rename(new_path)
 
-    # def play(self):
-    #     size = len(self.anime)
-    #     index = 0
-    #     max_index = min(size, 4)
-    #     for _ in range(0, max_index):
-    #         if random.choice([True, False]):
-    #             break
-    #         else:
-    #             index += 1
-    #     if max_index == index:
-    #         index = random.randint(0, size)
-    #     self.anime[index].play()
+    def play(self, index: int):
+        anime_directory: AnimeDirectory = self.collection[index]
+        anime: Anime = anime_directory.anime
+        file = anime_directory.play()
+        if typer.confirm("エピソードを完了しましたか？"):
+            current_episode = typer.prompt(
+                "エピソード番号を入力してください",
+                default=anime.current_episode + 1,
+                type=int,
+            )
+            anilist = Anilist(self.config.access_token)
+            status = "CURRENT" if current_episode < anime.episodes else "COMPLETED"
+            anilist.update_progress(anime.id, current_episode, status)
+            anime.current_episode = current_episode
+            anime_directory.anime = anime
+            anime_directory.save()
+            new_file = self.config.get_audio_path() / sanitize_filename(
+                f"{dt.datetime.now()} - {file.name}", "_"
+            )
+            new_file.parent.mkdir(exist_ok=True)
+            self.move_file(file, new_file)
+            if status == "COMPLETED":
+                shutil.rmtree(anime_directory.path)
+            elif status == "CURRENT":
+                self.adjust_elo_for_anime(index, 3)
 
-    # def save(self):
-    #     for anime in self.anime:
-    #         anime.save()
+    def play_random(self):
+        size = len(self.collection)
+        index = 0
+        max_index = min(size, 4)
+        for _ in range(0, max_index):
+            if random.choice([True, False]):
+                break
+            else:
+                index += 1
+        if max_index == index:
+            index = random.randint(0, size)
+        self.play(index)
 
-    # def elo(self, max_matches=32):
-    #     size = len(self.anime)
-    #     matches = []
-    #     for i in range(0, size):
-    #         for j in range(i + 1, size):
-    #             matches.append((i, j))
-    #     max_matches = min(len(matches), max_matches)
-    #     random.shuffle(matches)
-    #     matches = matches[0:max_matches]
-    #     for m in matches:
-    #         questions = [
-    #             inquirer.List(
-    #                 "answer",
-    #                 message="より好きなアニメを選んでください。",
-    #                 choices=[
-    #                     self.anime[m[0]].title,
-    #                     self.anime[m[1]].title,
-    #                     "Tie",
-    #                     "Exit",
-    #                 ],
-    #             ),
-    #         ]
-    #         prompt_result: dict[str, str] = inquirer.prompt(questions)
-    #         answer = prompt_result["answer"]
-    #         result = 0
-    #         if answer == "Exit":
-    #             break
-    #         elif answer == "Tie":
-    #             result = 0.5
-    #         elif answer == self.anime[m[0]].title:
-    #             result = 1.0
-    #         else:
-    #             result = 0.0
-    #         self.anime[m[0]].play_match(self.anime[m[1]], result)
-    #     self.save()
-    #     # for anime in self.anime:
-    #     #     anime.save()
-    #     # name = anime_path.name
-    #     # print(search_anime(name))
-    #     # break
+    def play_choose(self):
+        self.play(
+            TerminalMenu(
+                [str(ad.anime) for ad in self.collection],
+                title="アニメを選んでください",
+            ).show()  # pyright: ignore
+        )
+
+    def _adjust_elo(self, matches, max_matches):
+        max_matches = min(len(matches), max_matches)
+        random.shuffle(matches)
+        matches = matches[0:max_matches]
+        for m in matches:
+            questions = [
+                self.collection[m[0]].anime.title,
+                self.collection[m[1]].anime.title,
+                "Tie",
+                "Exit",
+            ]
+            index = TerminalMenu(
+                questions, title="より好きなアニメを選んでください。"
+            ).show()
+            result = 0
+            match index:
+                case 0:
+                    result = 1.0
+                case 1:
+                    result = 0.0
+                case 2:
+                    result = 0.5
+                case 3:
+                    break
+            self.collection[m[0]].anime.play_match(self.collection[m[1]].anime, result)
+            for i in range(2):
+                self.collection[m[i]].save()
+
+    def adjust_elo(self, max_matches=32):
+        size = len(self.collection)
+        matches = []
+        for i in range(0, size):
+            for j in range(i + 1, size):
+                matches.append((i, j))
+        self._adjust_elo(matches, max_matches)
+
+    def adjust_elo_for_anime(self, index, max_matches):
+        matches = []
+        for i in range(len(self.collection)):
+            if i != index:
+                matches.append((index, i))
+        self._adjust_elo(matches, max_matches)
