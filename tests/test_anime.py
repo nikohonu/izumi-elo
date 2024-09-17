@@ -1,4 +1,4 @@
-from izumi_elo.anime import Anime
+from izumi_elo.anime import Anime, MatchResult
 
 
 def test_play_match():
@@ -24,12 +24,12 @@ def test_play_match():
         current_episode=0,
         elo=1000,
     )
-    anime1.play_match(anime2, 1)
+    anime1.play_match(anime2, MatchResult.WIN)
     assert anime1.elo == 1208
     assert anime2.elo == 992
-    anime2.play_match(anime1, 0)
+    anime2.play_match(anime1, MatchResult.LOSS)
     assert anime1.elo == 1215
     assert anime2.elo == 985
-    anime1.play_match(anime2, 0.5)
+    anime1.play_match(anime2, MatchResult.DRAW)
     assert anime1.elo == 1206
     assert anime2.elo == 994

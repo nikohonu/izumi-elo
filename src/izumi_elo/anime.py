@@ -1,10 +1,19 @@
 import datetime as dt
+from enum import Enum
 
 import msgspec
 import typer
 from simple_term_menu import TerminalMenu
 
 import izumi_elo.anilist
+
+K_FACTOR = 32.0
+
+
+class MatchResult(Enum):
+    WIN = 1
+    DRAW = 0.5
+    LOSS = 0
 
 
 class Anime(msgspec.Struct, omit_defaults=True):
@@ -37,7 +46,8 @@ class Anime(msgspec.Struct, omit_defaults=True):
         ).strip()
         candidates: list[Anime] = izumi_elo.anilist.Anilist.search_anime(search)
         terminal = TerminalMenu(
-            [str(anime) for anime in candidates], title="Please select the correct anime."
+            [str(anime) for anime in candidates],
+            title="Please select the correct anime.",
         )
         index: int = terminal.show()  # pyright: ignore
         return candidates[index], True
@@ -53,9 +63,9 @@ class Anime(msgspec.Struct, omit_defaults=True):
             result += f" ({self.format})"
         return result
 
-    def play_match(self, other, result):
-        k_factor = 32.0
+    def play_match(self, other, result: MatchResult):
         p_self_elo: float = 1.0 / (1.0 + 10.0 ** ((other.elo - self.elo) / 400.0))
         p_other_elo: float = 1.0 - p_self_elo
-        self.elo = round(self.elo + k_factor * (result - p_self_elo))
-        other.elo = round(other.elo + k_factor * ((1 - result) - p_other_elo))
+
+        self.elo = round(self.elo + K_FACTOR * (result.value - p_self_elo))
+        other.elo = round(other.elo + K_FACTOR * ((1 - result.value) - p_other_elo))

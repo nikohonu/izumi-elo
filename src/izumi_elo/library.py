@@ -8,7 +8,7 @@ from pathvalidate import sanitize_filename
 from simple_term_menu import TerminalMenu
 
 from izumi_elo.anilist import Anilist
-from izumi_elo.anime import Anime
+from izumi_elo.anime import Anime, MatchResult
 from izumi_elo.anime_directory import AnimeDirectory
 from izumi_elo.config import Config
 
@@ -95,11 +95,11 @@ class Library:
             result = 0
             match index:
                 case 0:
-                    result = 1.0
+                    result = MatchResult.WIN
                 case 1:
-                    result = 0.0
+                    result = MatchResult.LOSS
                 case 2:
-                    result = 0.5
+                    result = MatchResult.DRAW
                 case 3:
                     break
             self.collection[m[0]].anime.play_match(self.collection[m[1]].anime, result)
