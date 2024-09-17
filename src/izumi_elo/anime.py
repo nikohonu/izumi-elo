@@ -11,10 +11,10 @@ class Anime(msgspec.Struct, omit_defaults=True):
     id: int
     title: str
     season_year: int | None
-    start_date: dt.date | None
     format: str
     episodes: int
     status: str
+    start_date: dt.date | None = None
     current_episode: int = 0
     elo: int = 1000
 
@@ -31,13 +31,13 @@ class Anime(msgspec.Struct, omit_defaults=True):
                 except msgspec.ValidationError:
                     pass
         search: str = typer.prompt(
-            "Anilist.coで検索するアニメのタイトルを入力してください",
+            "Please enter the title of the anime to search on Anilist.co",
             default=path.name,
             type=str,
         ).strip()
         candidates: list[Anime] = izumi_elo.anilist.Anilist.search_anime(search)
         terminal = TerminalMenu(
-            [str(anime) for anime in candidates], title="正しいアニメを選んでください"
+            [str(anime) for anime in candidates], title="Please select the correct anime."
         )
         index: int = terminal.show()  # pyright: ignore
         return candidates[index], True

@@ -16,7 +16,9 @@ class AnimeDirectory:
             new_path = self.path.with_name(
                 sanitize_filename(str(self.anime), replacement_text="_")
             )
-            if typer.confirm(f"アニメフォルダの名前を変更しますか「{new_path}」？"):
+            if typer.confirm(
+                f'Do you want to rename the anime folder to "{new_path}"?'
+            ):
                 self.path.rename(new_path)
                 self.path = new_path
 
@@ -26,7 +28,7 @@ class AnimeDirectory:
                 return self.anime.episodes - len(list(self.path.glob("*.mkv")))
 
             self.anime.current_episode = typer.prompt(
-                "現在のエピソードは？",
+                "What is the current episode?",
                 default=calc_current_episode(),
                 type=int,
             )
@@ -47,4 +49,3 @@ class AnimeDirectory:
         file = files[0]
         subprocess.run(["mpv", file])
         return file
-

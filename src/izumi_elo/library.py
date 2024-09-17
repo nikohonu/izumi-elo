@@ -35,9 +35,9 @@ class Library:
         anime_directory: AnimeDirectory = self.collection[index]
         anime: Anime = anime_directory.anime
         file = anime_directory.play()
-        if typer.confirm("エピソードを完了しましたか？"):
+        if typer.confirm("Did you finish the episode?"):
             current_episode = typer.prompt(
-                "エピソード番号を入力してください",
+                "Please enter the episode number.",
                 default=anime.current_episode + 1,
                 type=int,
             )
@@ -74,7 +74,7 @@ class Library:
         self.play(
             TerminalMenu(
                 [str(ad.anime) for ad in self.collection],
-                title="アニメを選んでください",
+                title="Please select the anime.",
             ).show()  # pyright: ignore
         )
 
@@ -90,7 +90,7 @@ class Library:
                 "Exit",
             ]
             index = TerminalMenu(
-                questions, title="より好きなアニメを選んでください。"
+                questions, title="Please select your preferred anime."
             ).show()
             result = 0
             match index:

@@ -34,7 +34,7 @@ class Config(msgspec.Struct):
             with config_path.open("rb") as file:
                 return msgspec.toml.decode(file.read(), type=cls, dec_hook=dec_hook)
         raise RuntimeError(
-            "設定ファイルを読み込めません。まず「init」関数を実行してください！"
+            'Unable to load the configuration file. Please run the "init" function first!'
         )
 
     def save(self):

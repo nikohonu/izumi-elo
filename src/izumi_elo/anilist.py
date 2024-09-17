@@ -58,7 +58,7 @@ class Anilist:
         response = self.get(query, variables)
         if response.status_code != 200:
             print(
-                "update_progressが失敗しました。ステータスコード：",
+                "update_progress failed. Status code:",
                 response.status_code,
             )
 

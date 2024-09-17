@@ -19,7 +19,7 @@ def init(
     ],
 ):
     get_url()
-    access_token = typer.prompt("アクセス トークンを入力してください", type=str)
+    access_token = typer.prompt("Please enter the access token", type=str)
     config = Config(
         library_path=library_path,
         access_token=access_token,
