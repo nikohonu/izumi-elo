@@ -40,7 +40,6 @@ class AnimeDirectory:
     def save(self):
         index_path = self.get_index_path()
         index_path.parent.mkdir(exist_ok=True)
-        print(self.anime.title, self.anime.elo)
         with index_path.open("wb") as file:
             file.write(msgspec.toml.encode(self.anime))
 

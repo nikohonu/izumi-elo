@@ -1,7 +1,7 @@
 [project]
 name = "izumi-elo"
-version = "0.1.0"
-description = "アニメフォルダを管理するためのプログラムです。再生、並び替え、今すぐ再生するのに最適なものを選択し、アクションをAnilist.coに反映する機能が含まれています。"
+version = "0.1.1"
+description = "This is a program for managing an anime folder. It includes features such as playing, sorting, selecting the best one to watch right now, and reflecting actions on Anilist.co."
 authors = [{ name = "nikohonu", email = "nikohonu@proton.me" }]
 dependencies = [
     "typer>=0.12.5",

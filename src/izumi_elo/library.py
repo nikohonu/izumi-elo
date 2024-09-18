@@ -11,6 +11,7 @@ from izumi_elo.anilist import Anilist
 from izumi_elo.anime import Anime, MatchResult
 from izumi_elo.anime_directory import AnimeDirectory
 from izumi_elo.config import Config
+from izumi_elo.print import print_match_result
 
 
 class Library:
@@ -102,7 +103,11 @@ class Library:
                     result = MatchResult.DRAW
                 case 3:
                     break
+
+            players = tuple(self.collection[m[i]].anime for i in range(2))
+            initial_ratings = tuple(player.elo for player in players)
             self.collection[m[0]].anime.play_match(self.collection[m[1]].anime, result)
+            print_match_result(result, initial_ratings, players)
             for i in range(2):
                 self.collection[m[i]].save()
 
