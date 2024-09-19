@@ -1,6 +1,6 @@
 [project]
 name = "izumi-elo"
-version = "0.1.1"
+version = "0.1.2"
 description = "This is a program for managing an anime folder. It includes features such as playing, sorting, selecting the best one to watch right now, and reflecting actions on Anilist.co."
 authors = [{ name = "nikohonu", email = "nikohonu@proton.me" }]
 dependencies = [

@@ -61,14 +61,14 @@ class Library:
     def play_random(self):
         size = len(self.collection)
         index = 0
-        max_index = min(size, 4)
-        for _ in range(0, max_index):
+        max_index = min(3, size - 1)
+        for i in range(max_index + 1):
             if random.choice([True, False]):
+                index = i
                 break
-            else:
-                index += 1
-        if max_index == index:
-            index = random.randint(0, size)
+        else:
+            if size > 4:
+                index = random.randint(4, size - 1)
         self.play(index)
 
     def play_choose(self):
