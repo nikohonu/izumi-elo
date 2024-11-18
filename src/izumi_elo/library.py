@@ -19,7 +19,7 @@ class Library:
         self.collection = []
         self.config = config
         for anime_path in self.config.library_path.iterdir():
-            if anime_path.is_file() or anime_path.name == "audio":
+            if anime_path.is_file() or anime_path.name in ["audio", ".stfolder"]:
                 continue
             anime_directory = AnimeDirectory(anime_path)
             self.collection.append(anime_directory)
